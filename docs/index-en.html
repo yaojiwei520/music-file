@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Title - English Version</title>
+    <link rel="stylesheet" href="styles.css"> <!-- 如果有样式文件 -->
+</head>
+<body>
+    <header>
+        <h1>Project Title</h1>
+        <nav>
+            <ul>
+                <li><a href="index-en.html">English</a></li>
+                <li><a href="index-zh.html">中文</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section>
+            <h2>How to Use?</h2>
+            <ol>
+                <li><strong>Environment Setup</strong>
+                    <p>Make sure you have Python 3.x installed on your computer.</p>
+                    <p>Install the <code>requests</code> and <code>beautifulsoup4</code> libraries:</p>
+                    <pre><code>pip install requests beautifulsoup4</code></pre>
+                </li>
+                <li><strong>Configure Cookies and Headers</strong>
+                    <p>Open the script and update the <code>cookies</code> and <code>get_html_headers</code> dictionaries.</p>
+                </li>
+                <li><strong>Run the Script</strong>
+                    <p>Execute the script in the command line:</p>
+                    <pre><code>python your_script_name.py</code></pre>
+                </li>
+                <li><strong>Select and Download Songs</strong>
+                    <p>Follow the prompts to input the song numbers you wish to download.</p>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>Used Scripts</h2>
+            <ul>
+                <li><code>check_ffmpeg_available()</code>: Checks if FFmpeg is installed.</li>
+                <li><code>convert_aac_to_mp3(input_filepath)</code>: Converts AAC files to MP3 format.</li>
+                <li><code>sanitize_filename(name)</code>: Cleans unsafe characters from filenames.</li>
+                <li><code>download_music_file(url, title, artist)</code>: Downloads music files based on the URL.</li>
+                <li><code>search_songs(keyword)</code>: Searches for songs based on keywords.</li>
+                <li><code>_get_play_id_from_html(track_id)</code>: Extracts play ID from the song detail page.</li>

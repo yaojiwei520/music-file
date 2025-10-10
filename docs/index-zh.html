@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目标题 - 中文版</title>
+    <link rel="stylesheet" href="styles.css"> <!-- 如果有样式文件 -->
+</head>
+<body>
+    <header>
+        <h1>项目标题</h1>
+        <nav>
+            <ul>
+                <li><a href="index-en.html">English</a></li>
+                <li><a href="index-zh.html">中文</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section>
+            <h2>如何使用？</h2>
+            <ol>
+                <li><strong>环境准备</strong>
+                    <p>确保您的计算机上安装了 Python 3.x。</p>
+                    <p>使用以下命令安装 <code>requests</code> 和 <code>beautifulsoup4</code> 库：</p>
+                    <pre><code>pip install requests beautifulsoup4</code></pre>
+                </li>
+                <li><strong>配置 Cookies 和 Headers</strong>
+                    <p>打开脚本并更新 <code>cookies</code> 和 <code>get_html_headers</code> 字典。</p>
+                </li>
+                <li><strong>运行脚本</strong>
+                    <p>在命令行中执行脚本：</p>
+                    <pre><code>python your_script_name.py</code></pre>
+                </li>
+                <li><strong>选择并下载歌曲</strong>
+                    <p>根据提示输入您想下载的歌曲序号，可以选择多个序号。</p>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>使用了哪几个脚本？</h2>
+            <ul>
+                <li><code>check_ffmpeg_available()</code>：检查系统中是否安装了 FFmpeg。</li>
+                <li><code>convert_aac_to_mp3(input_filepath)</code>：将 AAC 文件转换为 MP3 格式。</li>
+                <li><code>sanitize_filename(name)</code>：清理文件名中的不安全字符。</li>
+                <li><code>download_music_file(url, title, artist)</code>：根据 URL 下载音乐文件。</li>
+                <li><code>search_songs(keyword)</code>：根据关键词搜索歌曲。</li>
+                <li><code>_get_play_id_from_html(track_id)</code>：从歌曲详情页的 HTML 中提取播放 ID。</li>
+                <li><code>get_music_url(track_id)</code>：通过歌曲 ID 获取音乐的播放链接。</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>总结</h2>
+            <p>此脚本为您提供了一个便捷的工具，可以通过关键词搜索歌曲并下载相关音乐文件。请确保在使用前正确配置必要的 Cookies 和 Headers，并注意 FFmpeg 的可用性。</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 yaojiwei。保留所有权利。</p>
+    </footer>
+</body>
+</html>

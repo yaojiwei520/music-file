@@ -27,14 +27,14 @@ try:
     content = response.text
 
     # 将内容保存到本地文件
-    with open("cn_md.md", "w", encoding="utf-8") as f:
+    with open("README-zh.md", "w", encoding="utf-8") as f:
         f.write(content)
 
-    print(f"成功爬取 {url} 并保存到 cn_md.md")
+    print(f"成功爬取 {url} 并保存到 README-zh.md")
     print(f"文件大小: {len(content)} 字节")
     # print("\n--- 文件开头部分 ---")
     # print(content[:1000]) # 打印前1000个字符
-    # print("--- ... (文件其余内容已保存到 cn_md.md) ---")
+    # print("--- ... (文件其余内容已保存到 README-zh.md) ---")
 
 except requests.exceptions.RequestException as e:
     print(f"请求失败: {e}")
