@@ -1,0 +1,17 @@
+{
+  "music_scraper_config": {
+    "host": "10.10.10.130",
+    "port": 3306,
+    "user": "scraper_user",
+    "password": "3971247",
+    "database": "music_data",
+    "role": "writer",
+    "pool_size": 10,       // 参考文档中的默认值
+    "max_overflow": 20,    // 参考文档中的默认值
+    "pool_recycle": 3600,  // 参考文档中的默认值
+    "pool_timeout": 30,    // 参考文档中的默认值
+    "type": "mysql"
+  }
+  // 如果还有其他数据库连接，可以继续在这里添加
+  // "default": { ... }, // 如果需要默认配置，也在此处添加
+}

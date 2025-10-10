@@ -1,0 +1,481 @@
+你是一名专业的代码替换助手。
+
+**任务说明:**
+你的职责是：
+1.  从提供的 "[示例代码]" 中精确提取最新的 `cookies` 字典的完整内容。
+2.  从提供的 "[示例代码]" 中精确提取最新的 `headers` 字典的完整内容。
+3.  将这些提取到的 `cookies` 字典内容替换到 "[固定代码]" 中 **同名**的 `cookies` 变量中。
+4.  将这些提取到的 `headers` 字典内容替换到 "[固定代码]" 中 **`get_html_headers`** 变量中。
+5.  **注意：** "[固定代码]" 中除了 `cookies` 和 `get_html_headers` 之外的其他变量（如 `post_api_headers`）保持原样不变，因为 "[示例代码]" 中没有提供对应的替换内容。
+6.  你的输出必须是直接替换完成后的**完整 Python 代码**，即合并了更新内容的 "[固定代码]"。
+7.  **严格遵循：** 在输出中，**不要添加任何额外的文字、解释、对话、引用、代码块注释、前言或后语，只需要输出最终的完整 Python 代码。**
+
+**[示例代码] 开始**
+```python
+cookies = {
+    'server_name_session': '48ac7eb90472522710b482184d07bcd6',
+    'Hm_tf_no8z3ihhnja': '1759891990',
+    'Hm_lvt_no8z3ihhnja': '1759891990,1759914819,1759943487,1759975751',
+    'Hm_lvt_49c19bcfda4e5fdfea1a9bb225456abe': '1759891991,1759914819,1759943486,1759975753',
+    'HMACCOUNT': 'F2D39E6791DCFBD4',
+    'Hm_lpvt_no8z3ihhnja': '1759975775',
+    'Hm_lpvt_49c19bcfda4e5fdfea1a9bb225456abe': '1759975775',
+}
+
+headers = {
+    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
+    'cache-control': 'max-age=0',
+    'dnt': '1',
+    'priority': 'u=0, i',
+    'referer': 'https://www.gequhai.com/',
+    'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+    'sec-fetch-dest': 'document',
+    'sec-fetch-mode': 'navigate',
+    'sec-fetch-site': 'same-origin',
+    'sec-fetch-user': '?1',
+    'upgrade-insecure-requests': '1',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+    # 'cookie': 'server_name_session=48ac7eb90472522710b482184d07bcd6; Hm_tf_no8z3ihhnja=1759891990; Hm_lvt_no8z3ihhnja=1759891990,1759914819,1759943487,1759975751; Hm_lvt_49c19bcfda4e5fdfea1a9bb225456abe=1759891991,1759914819,1759943486,1759975753; HMACCOUNT=F2D39E6791DCFBD4; Hm_lpvt_no8z3ihhnja=1759975775; Hm_lpvt_49c19bcfda4e5fdfea1a9bb225456abe=1759975775',
+}
+
+response = requests.get('https://www.gequhai.com/s/%E9%82%93%E7%B4%AB%E6%A3%8B', cookies=cookies, headers=headers)
+```
+**[示例代码] 结束**
+
+**[固定代码] 开始**
+```python
+import requests
+import re
+import json
+import urllib.parse
+import time
+import sys
+from pathlib import Path
+from bs4 import BeautifulSoup
+
+# --- 全局配置 ---
+# 注意：这些 Cookies 和 Headers 可能有有效期，如果代码运行失败，
+# 务必从浏览器中获取最新的 Cookies 和 Headers 并更新这里的字典。
+# 当前 Cookies 和 Headers 是基于你上次成功的运行日志提供的。
+cookies = {
+    'server_name_session': '48ac7eb90472522710b482184d07bcd6',
+    'Hm_tf_no8z3ihhnja': '1759891990',
+    'Hm_lvt_no8z3ihhnja': '1759891990,1759914819,1759943487,1759975751',
+    'Hm_lvt_49c19bcfda4e5fdfea1a9bb225456abe': '1759891991,1759914819,1759943486,1759975753',
+    'HMACCOUNT': 'F2D39E6791DCFBD4',
+    'Hm_lpvt_49c19bcfda4e5fdfea1a9bb225456abe': '1759975907',
+    'PHPSESSID': 'ba8veihlq2066mpmrbvi4tngm3',
+    'Hm_lpvt_no8z3ihhnja': '1759976911',
+}
+
+# 用于获取 HTML 页面（搜索结果页和歌曲详情页）的 Headers
+get_html_headers = {
+    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
+    'cache-control': 'max-age=0',
+    'dnt': '1',
+    'priority': 'u=0, i',
+    'referer': 'https://www.gequhai.com/s/%E9%82%93%E7%B4%AB%E6%A3%8B',
+    'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+    'sec-fetch-dest': 'document',
+    'sec-fetch-mode': 'navigate',
+    'sec-fetch-site': 'same-origin',
+    'sec-fetch-user': '?1',
+    'upgrade-insecure-requests': '1',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+}
+
+# 用于调用 API 获取播放链接的 Headers
+post_api_headers = {
+    'accept': 'application/json, text/javascript, */*; q=0.01',
+    'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
+    'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    'dnt': '1',
+    'origin': 'https://www.gequhai.com',
+    'priority': 'u=1, i',
+    'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+    'sec-fetch-dest': 'empty',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'same-origin',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+    'x-custom-header': 'SecretKey',
+    'x-requested-with': 'XMLHttpRequest',
+}
+
+# --- 常量和配置 ---
+INITIAL_REQUEST_DELAY = 1.0  # 初始请求延时（秒），建议保持在 1.0 秒或调大至 2.0-3.0 秒
+MAX_RETRIES = 3  # 最大重试次数
+RETRY_DELAY_MULTIPLIER = 2  # 重试延时乘数
+DOWNLOAD_DIR = Path("downloads")  # 下载目录
+
+# 正则表达式用于从错误信息中提取等待时间
+RETRY_TIME_PATTERN = re.compile(r'请 (\d+) 秒后再试。')
+
+
+def print_status(message, end='\n'):
+    """统一的打印函数，方便管理输出"""
+    print(message, end=end)
+    sys.stdout.flush()  # 立即刷新输出流
+
+
+# --- 下载功能辅助函数（已修复防盗链和路径） ---
+def sanitize_filename(name):
+    """
+    清理文件名中不安全的字符，避免文件系统错误。
+    """
+    return re.sub(r'[\\/:*?"<>|]', '_', name)
+
+
+def download_music_file(url, title, artist):
+    """
+    根据 URL 下载音乐文件，并以 'downloads/歌曲名 - 艺术家.扩展名' 格式保存。
+    """
+    if not url:
+        return False
+
+    # 1. 构造文件名
+    # 提取 URL 路径中的扩展名，支持带查询参数的 URL
+    extension_match = re.search(r'\.(\w{2,4})(?:[?#].*)?$', urllib.parse.urlparse(url).path)
+    extension = extension_match.group(1).lower() if extension_match else 'mp3'
+
+    sanitized_title = sanitize_filename(title)
+    sanitized_artist = sanitize_filename(artist)
+    filename = f"{sanitized_title} - {sanitized_artist}.{extension}"
+
+    # 核心修改：创建目录并构造最终路径
+    DOWNLOAD_DIR.mkdir(exist_ok=True)  # 确保 downloads 目录存在
+    file_path = DOWNLOAD_DIR / filename
+
+    # 检查文件是否已存在
+    if file_path.exists():
+        print_status(f"  [下载] 文件已存在，跳过: {file_path}")
+        return True
+
+    # 2. 执行下载
+    try:
+        # 核心修复：移除 Referer 和不相关的 Cookies，使用简洁 Headers 避免防盗链
+        download_headers = {
+            'User-Agent': get_html_headers['user-agent'],
+            'Accept': '*/*',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+        }
+
+        print_status(f"  [下载] 正在请求下载链接...", end='')
+
+        response = requests.get(url, headers=download_headers, stream=True, timeout=30)
+        response.raise_for_status()  # 捕获 4xx/5xx 错误
+
+        # 检查Content-Type是否为音频类型 (可选的额外检查)
+        content_type = response.headers.get('Content-Type', '').lower()
+        if not (content_type.startswith('audio') or 'octet-stream' in content_type or 'mpeg' in content_type):
+            print_status(f"  [下载] 警告: URL内容类型不是音频/流 ({content_type})。", end='\n')
+            return False
+
+        file_size = response.headers.get('Content-Length')
+        file_size_mb = f"约 {int(file_size) / (1024 * 1024):.2f} MB" if file_size else "未知大小"
+        # 重新打印开始信息，包含文件大小
+        print_status(f"  [下载] 开始下载 ({file_size_mb})...", end='')
+
+        with open(file_path, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+
+        print_status(f" --> 成功保存为: {file_path}", end='\n')
+        return True
+
+    except requests.exceptions.RequestException as err:
+        print_status(f"  [下载] 错误: 下载时发生网络错误: {err}", end='\n')
+    except Exception as e:
+        print_status(f"  [下载] 错误: 下载文件时发生未知错误: {e}", end='\n')
+
+    return False
+
+
+# --- 歌曲信息获取函数 (保持不变) ---
+def search_songs(keyword):
+    """
+    根据关键词搜索歌曲，并提取歌曲ID、标题和艺术家。
+    """
+    encoded_keyword = urllib.parse.quote(keyword)
+    search_url = f'https://www.gequhai.com/s/{encoded_keyword}'
+
+    song_list = []
+    print_status(f"--- 步骤 1: 搜索关键词 '{keyword}' (URL: {search_url}) ---")
+
+    try:
+        response = requests.get(search_url, cookies=cookies, headers=get_html_headers, timeout=10)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        tbody = soup.find('tbody')
+        if not tbody:
+            print_status("  未在搜索结果中找到歌曲列表。")
+            return []
+
+        rows = tbody.find_all('tr')
+        if not rows:
+            print_status("  搜索结果中未找到任何歌曲行。")
+            return []
+
+        for row in rows:
+            link_tag = row.find('a', href=re.compile(r'/play/\d+'))
+
+            if link_tag:
+                href = link_tag['href']
+                song_id = href.split('/')[-1]
+                song_title = link_tag.get_text(strip=True)
+
+                title_td = link_tag.find_parent('td')
+                artist_td = title_td.find_next_sibling('td')
+                artist = artist_td.get_text(strip=True) if artist_td else '未知艺术家'
+
+                song_list.append({
+                    'id': song_id,
+                    'title': song_title,
+                    'artist': artist
+                })
+
+        print_status(f"  成功搜索到 {len(song_list)} 首歌曲。")
+    except requests.exceptions.RequestException as err:
+        print_status(f"  错误: 搜索歌曲时发生网络或HTTP错误: {err}")
+    except Exception as e:
+        print_status(f"  错误: 解析搜索结果时发生未知错误: {e}")
+
+    return song_list
+
+
+def _get_play_id_from_html(track_id):
+    """
+    一个内部辅助函数，从歌曲详情页的 HTML 中提取 play_id。
+    """
+    play_page_url = f'https://www.gequhai.com/play/{track_id}'
+
+    try:
+        response_get = requests.get(play_page_url, cookies=cookies, headers=get_html_headers, timeout=10)
+        response_get.raise_for_status()
+
+        html_content = response_get.text
+        match = re.search(r"window\.play_id\s*=\s*'([^']*)';", html_content)
+
+        if match:
+            return match.group(1)
+    except requests.exceptions.RequestException:
+        pass
+    except Exception:
+        pass
+    return None
+
+
+def get_music_url(track_id):
+    """
+    通过歌曲的 track_id 获取音乐的播放链接和相关信息。
+    加入了重试和动态延时机制。
+    """
+    for attempt in range(MAX_RETRIES + 1):
+        if attempt > 0:
+            print_status(f"\n  > 尝试重试... (第 {attempt} 次)", end='')
+            time.sleep(INITIAL_REQUEST_DELAY * RETRY_DELAY_MULTIPLIER)
+
+        # 步骤 2.1: 从 HTML 中提取 play_id
+        extracted_play_id = _get_play_id_from_html(track_id)
+        if not extracted_play_id:
+            if attempt == MAX_RETRIES:
+                print_status(f"\n  未能 {track_id} 找到 play_id，已达最大重试次数。")
+            continue
+
+        # 步骤 2.2: 使用提取到的 play_id 调用 API
+        api_url = 'https://www.gequhai.com/api/music'
+        api_data = {
+            'id': extracted_play_id,
+            'type': '0',
+        }
+
+        try:
+            response_post = requests.post(api_url, cookies=cookies, headers=post_api_headers, data=api_data,
+                                          timeout=15)
+            response_post.raise_for_status()
+
+            if response_post.headers.get('content-type', '').startswith('application/json'):
+                json_data = response_post.json()
+                if json_data.get('code') == 200:
+                    return json_data['data']
+                else:
+                    error_msg = json_data.get('msg', '未知错误')
+                    print_status(f"\n  API 返回错误 (ID: {track_id}): {error_msg}")
+                    # 检查是否是请求过于频繁的错误
+                    match_retry_time = RETRY_TIME_PATTERN.search(error_msg)
+                    if match_retry_time:
+                        wait_time = int(match_retry_time.group(1))
+                        print_status(f"  根据服务器指示，等待 {wait_time} 秒后重试...")
+                        time.sleep(wait_time + 1)
+                        # 设置状态码为 429 模拟重试逻辑，让循环继续
+                        response_post.status_code = 429
+                        continue  # 跳过当前循环，进入下一次重试
+                    else:
+                        return None
+            else:
+                print_status(f"\n  错误: API 响应不是有效的 JSON (ID: {track_id})。")
+                return None
+
+        except requests.exceptions.JSONDecodeError:
+            print_status(f"\n  错误: API 响应无法解析为 JSON (ID: {track_id})。")
+            return None
+        except requests.exceptions.HTTPError as he:
+            if he.response.status_code == 429:
+                print_status(f"\n  错误: 请求过于频繁，服务器响应 429 (ID: {track_id})。")
+                time.sleep(5)  # 简单延时后重试
+            else:
+                print_status(f"\n  错误: 调用 API 时发生HTTP错误 (ID: {track_id}): {he}")
+                return None
+        except requests.exceptions.RequestException as err:
+            print_status(f"\n  错误: 调用 API 时发生网络错误 (ID: {track_id}): {err}")
+            if "Connection reset by peer" in str(err) or "Max retries exceeded" in str(err) or "Read timed out" in str(
+                    err):
+                print_status(f"  检测到连接相关错误，尝试重试...", end='')
+                time.sleep(INITIAL_REQUEST_DELAY)
+            else:
+                return None
+        except Exception as e:
+            print_status(f"\n  错误: 处理API响应时发生未知错误 (ID: {track_id}): {e}")
+            return None
+
+    # 如果所有重试都失败
+    print_status(f"\n  未能获取 {track_id} 的播放链接，已达最大重试次数。")
+    return None
+
+
+# --- 主程序执行部分（优化了用户输入逻辑和最终提示） ---
+if __name__ == "__main__":
+    print_status("--- 欢迎使用歌曲查询与播放链接获取工具 ---")
+
+    print_status("\n==== 重要提示 ====")
+    print_status("如果程序运行失败或出现频繁请求错误，请检查 `cookies` 和 `headers` 是否已更新。")
+    print_status("===================\n")
+
+    search_query = input("请输入您想搜索的歌曲关键词: ").strip()
+
+    if not search_query:
+        print_status("未输入搜索关键词，程序退出。")
+    else:
+        # 1. 搜索歌曲
+        found_songs = search_songs(search_query)
+
+        if not found_songs:
+            print_status(f"没有找到与 '{search_query}' 相关的歌曲。")
+        else:
+            print_status(f"\n--- 列表 '{search_query}' 的搜索结果 ({len(found_songs)} 首) ---")
+            for i, song in enumerate(found_songs):
+                print_status(f"{i + 1}. {song['title']} - {song['artist']} (ID: {song['id']})")
+
+            # --- 优化后的用户输入和选择逻辑 ---
+            input_str = input(
+                f"\n您想获取并下载哪些歌曲？ (输入数字，空格分隔选择多首，输入all获取全部，回车默认前5首): ").strip().lower()
+
+            songs_to_process = []
+
+            if not input_str:
+                # 默认处理前5首
+                songs_to_process = found_songs[:5]
+            elif input_str == 'all':
+                # 处理全部歌曲
+                songs_to_process = found_songs
+            else:
+                # 处理空格分隔的数字输入
+                selected_indices = []
+                try:
+                    parts = input_str.split()
+                    for part in parts:
+                        if part.isdigit():
+                            # 用户输入是 1-based，转换为 0-based 索引
+                            index = int(part) - 1
+                            if 0 <= index < len(found_songs):
+                                selected_indices.append(index)
+                            else:
+                                print_status(f"  警告: 序号 {part} 超出列表范围，已忽略。")
+                        else:
+                            print_status(f"  警告: 无效输入 '{part}'，已忽略。")
+
+                    # 移除重复的索引并按顺序排列
+                    selected_indices = sorted(list(set(selected_indices)))
+
+                    # 构建要处理的歌曲列表
+                    for index in selected_indices:
+                        songs_to_process.append(found_songs[index])
+
+                except Exception as e:
+                    print_status(f"  错误: 解析选择序号时发生错误: {e}。程序将退出。")
+                    sys.exit(1)
+
+            num_to_process = len(songs_to_process)
+
+            if num_to_process == 0:
+                print_status("  未选择任何有效的歌曲，程序退出。")
+                sys.exit(0)
+
+            print_status(f"  --- 开始获取并下载 {num_to_process} 首歌曲 (可能需要一些时间) ---")
+
+            full_music_results = []
+            successful_count = 0
+            failed_count = 0
+            download_successful_count = 0
+
+            # 遍历选中的歌曲列表
+            for i, song in enumerate(songs_to_process):
+                print_status(
+                    f"\n  --- 任务 [{i + 1}/{num_to_process}] --- 正在处理: {song['title']} - {song['artist']} (ID: {song['id']})")
+
+                # 步骤 A: 获取播放链接
+                music_data = get_music_url(song['id'])
+
+                if music_data and music_data.get('url'):
+                    successful_count += 1
+                    play_url = music_data.get('url')
+                    print_status(f"  > 链接获取成功。")
+
+                    song_with_url = {
+                        'title': song['title'],
+                        'artist': song['artist'],
+                        'track_id': song['id'],
+                        'play_url': play_url,
+                        'is_while_url': music_data.get('is_while_url')
+                    }
+                    full_music_results.append(song_with_url)
+
+                    # 步骤 B: 下载文件 (使用已修复的函数)
+                    if download_music_file(play_url, song['title'], song['artist']):
+                        download_successful_count += 1
+                    # 失败信息已在 download_music_file 中打印
+
+                else:
+                    failed_count += 1
+                    print_status("  > 链接获取失败。")
+
+                # 每次请求后添加延时，防止 API 频繁请求限制
+                time.sleep(INITIAL_REQUEST_DELAY)
+
+            print_status("\n" + "=" * 50)
+            print_status("--- 最终获取到的所有歌曲信息及播放链接 ---")
+            if full_music_results:
+                print_status(json.dumps(full_music_results, indent=2, ensure_ascii=False))
+
+                print_status(f"\n总结：")
+                print_status(f"链接获取成功: {successful_count} 首 / 链接获取失败: {failed_count} 首")
+                print_status(f"文件下载成功: {download_successful_count} 首")
+                # 最终提示修改：指出下载目录
+                print_status(f"\n所有已下载文件位于当前脚本目录下的 **{DOWNLOAD_DIR.name}** 文件夹内。")
+            else:
+                print_status(f"未能成功获取任何歌曲的播放链接。请检查关键词或更新 Cookies/Headers。")
+            print_status("=" * 50)
+    print_status("\n程序执行完毕。")
+```
+**[固定代码] 结束**
